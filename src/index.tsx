@@ -1,5 +1,24 @@
-import ReactDOM from "react-dom";
-import React from "react";
-import MyApp from "./containers/MyApp";
+import detectEthereumProvider from "@metamask/detect-provider";
 
-ReactDOM.render(<MyApp greeting="foo" />, document.getElementById("root"));
+const accountsChanged = async (provider: any) => {
+  console.log("CHANGED");
+  const accounts = await provider.request({ method: "eth_accounts" });
+  console.log(`We have accounts: ${JSON.stringify(accounts)}`);
+};
+
+const main = async () => {
+  const provider: any = await detectEthereumProvider();
+  provider.on("accountsChanged", () => {
+    accountsChanged(provider);
+  });
+  await provider.request({
+    method: "wallet_requestPermissions",
+    params: [
+      {
+        eth_accounts: {},
+      },
+    ],
+  });
+};
+
+main();
